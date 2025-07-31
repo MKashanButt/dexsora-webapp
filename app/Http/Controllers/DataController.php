@@ -7,6 +7,7 @@ use App\Services\DataService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class DataController extends Controller
 {
@@ -33,7 +34,7 @@ class DataController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', 'Data Moved to ' . $status);
+            ->with('success', 'Data Moved to ' . ucwords(str_replace('-', ' ', $status)));
     }
 
     /**
@@ -60,21 +61,24 @@ class DataController extends Controller
         $queryParams = $request->query('field');
         $input = $request->input($queryParams);
 
-        if (in_array($queryParams, ['document', 'pod'])) {
-            if ($request->hasFile($queryParams)) {
-                $file = $request->file($queryParams);
-                $path = $file->store("uploads/{$queryParams}", 'public');
+        if ($request->hasFile($queryParams)) {
+            $storedFiles = [];
 
-                $this->dataService->update([$queryParams => $path], $data);
-
-                return redirect()
-                    ->back()
-                    ->with('success', ucfirst($queryParams) . ' uploaded successfully.');
+            foreach ($request->file($queryParams) as $file) {
+                $originalName = $file->getClientOriginalName();
+                $path = $file->storeAs("uploads/{$queryParams}", $originalName, 'public');
+                $storedFiles[] = $path;
             }
 
-            return redirect()
-                ->back()
-                ->withErrors([$queryParams => ucfirst($queryParams) . ' file is required.']);
+            $existing = $data->$queryParams ?? [];
+            $existing = is_array($existing) ? $existing : json_decode($existing, true);
+            $merged = array_merge($existing ?? [], $storedFiles);
+
+            $this->dataService->update([
+                $queryParams => json_encode($merged),
+            ], $data);
+
+            return redirect()->back()->with('success', ucfirst($queryParams) . ' uploaded.');
         }
 
         $this->dataService->update([
@@ -84,6 +88,18 @@ class DataController extends Controller
         return redirect()
             ->back()
             ->with('success', ucwords($queryParams) . ' Added');
+    }
+    public function deleteFile(Request $request, Data $data, $field)
+    {
+        $fileToDelete = $request->input('file');
+
+        $files = json_decode($data->$field, true) ?? [];
+
+        if ($this->dataService->deleteFile($data, $fileToDelete, $files, $field)) {
+            return redirect()->back()->with('success', 'File deleted.');
+        }
+
+        return redirect()->back()->with('error', 'An error occured.');
     }
 
     /**
