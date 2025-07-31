@@ -58,11 +58,11 @@
             @include('layouts.navigation')
 
             <!-- Main Content -->
-            <div class="flex flex-col flex-1 h-screen">
+            <div class="flex flex-col w-[75%] h-screen">
                 <!-- Page Heading -->
                 <x-header />
                 <!-- Page Content -->
-                <main class="h-auto border-2 border-[{{ config('theme.primary') }}] rounded-md mx-8 my-4">
+                <main class="h-auto  rounded-md mx-8 my-4">
                     {{ $slot }}
                 </main>
             </div>

@@ -1,3 +1,4 @@
-<p class="text-xs font-semibold text-[#706f6c] uppercase tracking-wider mb-2 bg-inherit p-2 text-white rounded-sm">
+<p
+    class=" flex gap-2 items-center text-xs font-semibold text-[{{ config('theme.text.default') }}] uppercase tracking-wider bg-inherit p-2 rounded-sm select-none">
     {{ $slot }}
 </p>

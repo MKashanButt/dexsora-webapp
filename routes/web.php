@@ -1,13 +1,27 @@
 <?php
 
+use App\Http\Controllers\DataController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('index');
-})
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Route::middleware(['auth', 'verified'])
+    ->group(function () {
+        Route::get('/', function () {
+            return view('index');
+        })
+            ->name('dashboard');
+        Route::controller(DataController::class)
+            ->prefix('customers')
+            ->group(function () {
+                Route::get('/{status}', 'index')
+                    ->name('index');
+                Route::get('move/{data}', 'move')
+                    ->name('move');
+                Route::patch('/{data}', 'update')
+                    ->name('update');
+            });
+    });
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
