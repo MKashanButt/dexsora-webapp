@@ -4,7 +4,7 @@
     $sheets = config('sheets');
 @endphp
 <x-app-layout>
-    <div class="w-[100%] h-[390px] overflow-scroll">
+    <div class="w-[100%] h-full overflow-scroll">
         <table class="w-full divide-y divide-[#e3e3e0] mt-4">
             <thead class="bg-gray-200 select-none">
                 <tr>
@@ -27,28 +27,58 @@
 
                                 @if ($fields['name'] === 'created_at')
                                     {{ $value->format('Y-m-d') }}
-                                @elseif(is_null($value))
+                                @elseif(is_null($value) || $value == '[]')
                                     <form method="POST"
                                         action="{{ route('update', ['data' => $item->id, 'field' => $fields['name']]) }}"
                                         enctype="multipart/form-data">
                                         @csrf
                                         @method('PATCH')
-                                        <input type="{{ $fields['type'] }}" name="{{ $fields['name'] }}"
-                                            class="border border-gray-300 px-2 py-1 text-xs rounded"
+                                        <input type="{{ $fields['type'] }}"
+                                            name="{{ in_array($fields['name'], ['document', 'pod']) ? $fields['name'] . '[]' : $fields['name'] }}"
+                                            multiple class="border border-gray-300 px-2 py-1 text-xs rounded"
                                             placeholder="Enter {{ $fields['name'] }}">
                                         <button type="submit"
                                             class="ml-1 text-blue-500 hover:underline text-xs">Save</button>
                                     </form>
                                 @elseif(in_array($fields['name'], ['document', 'pod']))
-                                    <a href="{{ Storage::url($value) }}" target="__blank">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round"
-                                            class="lucide lucide-file-icon lucide-file">
-                                            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-                                            <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-                                        </svg>
-                                    </a>
+                                    <div class="flex gap-2">
+                                        @foreach (json_decode($value) as $document)
+                                            <div class="relative  flex" x-data="{ open: false }">
+                                                <span @click="open=!open">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                                                        height="24" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        class="lucide lucide-file-icon lucide-file">
+                                                        <path
+                                                            d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                                                        <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                                                    </svg>
+                                                </span>
+                                                <div class="absolute bottom-[-70px] p-2 border rounded-sm bg-white z-100"
+                                                    x-show="open" x-cloak @click.away="open = false">
+                                                    <p class="text-center">{{ basename($document) }} </p>
+                                                    <div class="flex gap-2 mt-2">
+                                                        <a href="{{ Storage::url($document) }}" target="__blank">
+                                                            <span
+                                                                class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset">View</span>
+                                                        </a>
+                                                        <form
+                                                            action="{{ route('file.delete', ['data' => $item->id, 'field' => 'document']) }}"
+                                                            method="POST"
+                                                            onsubmit="return confirm('Delete this file?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <input type="hidden" name="file"
+                                                                value="{{ $document }}">
+                                                            <button type="submit"
+                                                                class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset cursor-pointer">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 @else
                                     {{ $value }}
                                 @endif
