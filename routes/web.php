@@ -15,10 +15,12 @@ Route::middleware(['auth', 'verified'])
             ->group(function () {
                 Route::get('/{status}', 'index')
                     ->name('index');
-                Route::get('move/{data}', 'move')
-                    ->name('move');
                 Route::patch('/{data}', 'update')
                     ->name('update');
+                Route::delete('/data/{data}/{field}/delete-file', [DataController::class, 'deleteFile'])
+                    ->name('file.delete');
+                Route::get('move/{data}', 'move')
+                    ->name('move');
             });
     });
 
