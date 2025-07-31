@@ -22,9 +22,9 @@ return new class extends Migration
                 ->nullable();
             $table->string('address')
                 ->nullable();
-            $table->string('document')
+            $table->json('document')
                 ->nullable();
-            $table->string('pod')
+            $table->json('pod')
                 ->nullable();
             $table->enum('status', [
                 'inquiries',
