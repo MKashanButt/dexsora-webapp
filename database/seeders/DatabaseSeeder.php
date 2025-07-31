@@ -13,12 +13,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::create([
-        //     'name' => 'Test',
-        //     'email' => 'test@testing.com',
-        //     'password' => bcrypt('Password123'),
-        //     'company' => "Acme Inc"
-        // ]);
+        User::create([
+            'name' => 'Test',
+            'email' => 'test@testing.com',
+            'password' => bcrypt('Password123'),
+            'company' => "Acme Inc"
+        ]);
 
         $this->call(DataSeeder::class);
     }
