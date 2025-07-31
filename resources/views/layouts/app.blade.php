@@ -62,7 +62,7 @@
                 <!-- Page Heading -->
                 <x-header />
                 <!-- Page Content -->
-                <main class="h-auto  rounded-md mx-8 my-4">
+                <main class="h-[100vh]  rounded-md mx-8 my-4">
                     {{ $slot }}
                 </main>
             </div>
