@@ -24,7 +24,6 @@
                                 @php
                                     $value = $item[$fields['name']] ?? null;
                                 @endphp
-
                                 @if ($fields['name'] === 'created_at')
                                     {{ $value->format('Y-m-d') }}
                                 @elseif(is_null($value) || $value == '[]')
