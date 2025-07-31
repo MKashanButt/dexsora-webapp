@@ -20,6 +20,11 @@ class Data extends Model
         "user_id",
     ];
 
+    protected $casts = [
+        'document' => 'array',
+        'pod' => 'array',
+    ];
+
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
